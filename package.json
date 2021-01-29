@@ -1,0 +1,34 @@
+{
+  "name": "rulevalidationapi",
+  "version": "1.0.0",
+  "description": "Rule Validtion Api For FlutterWave Assessment",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "start:dev": "nodemon src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pappyJ/rule-validation.git"
+  },
+  "keywords": [
+    "validate",
+    "rule-validate"
+  ],
+  "author": "Peter Joshua",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pappyJ/rule-validation/issues"
+  },
+  "homepage": "https://github.com/pappyJ/rule-validation#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.20",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
