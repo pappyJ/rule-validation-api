@@ -56,7 +56,7 @@ exports.payloadValidate = (prop) => {
 
     if (!validTypes.includes(true)) {
         return {
-            error: 'The data field should be a valid JSON object.',
+            error: 'The data field should a|an (object|array|string).',
         };
     }
 
