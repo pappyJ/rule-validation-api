@@ -109,7 +109,7 @@ exports.ruleFieldsValidate = (prop) => {
     if (!_.isString(newObj.field) && !_.isUndefined(newObj.field)) {
       return {
           
-          error: 'invalid type, rule.field must be string.',
+          error: 'rule.field should be a string.',
       };
   }
 
@@ -162,7 +162,7 @@ exports.fieldCheck = (prop) => {
     }
 
     if (_.isObject(data) || fields.length == 1) {
-      
+
         return _.isUndefined(_.get(newObj, `data.${ruleField}`))
             ? {
                   error: `field ${ruleField} is is missing from data.`,
