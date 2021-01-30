@@ -17,11 +17,11 @@ const app = require('./app');
 //catching uncaught errors
 
 process.on('uncaughtException', (err) => {
-  console.log(err.name, err.message);
+    console.log(err.name, err.message);
 
-  console.log('UNCAUGHT EXCEPTOIN! Shutting Down');
+    console.log('UNCAUGHT EXCEPTOIN! Shutting Down');
 
-  process.exit(1);
+    process.exit(1);
 });
 
 //end of third party and custon initialisations
@@ -29,25 +29,27 @@ process.on('uncaughtException', (err) => {
 //creating the variable for the port
 
 const server = app.listen(PORT, () => {
-  console.log(`Listening To Requests On Port ${PORT}....`);
+    console.log(`Listening To Requests On Port ${PORT}....`);
 });
 
 process.on('unhandledRejection', (err) => {
-  console.log(err.name, err.message);
+    console.log(err.name, err.message);
 
-  console.log('❌❌❌ ➡ ⬇⬇⬇ An Error occured -> UNHANDLED REJECTION ERROR ⬇⬇⬇');
+    console.log(
+        '❌❌❌ ➡ ⬇⬇⬇ An Error occured -> UNHANDLED REJECTION ERROR ⬇⬇⬇'
+    );
 
-  server.close(() => {
-    process.exit(1);
-  });
+    server.close(() => {
+        process.exit(1);
+    });
 });
 
 //RESPONDING TO HEROKU SIGTERM
 
 process.on('SIGTERM', () => {
-  _logger.log('info', 'SIGTERM Recieved Shutting Down Gracefuly!!!');
+    console.log('info', 'SIGTERM Recieved Shutting Down Gracefuly!!!');
 
-  server.close(() => {
-    _logger.log('info', 'Process Terminated');
-  });
+    server.close(() => {
+        console.log('info', 'Process Terminated');
+    });
 });

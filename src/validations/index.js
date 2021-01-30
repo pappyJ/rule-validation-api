@@ -11,11 +11,8 @@ const _ = require('lodash');
 exports.parentValidate = (prop) => {
     const newObj = { ...prop };
 
-    const response = { value: ' ', error: ' ' };
-
     if (!_.isObject(newObj)) {
         return {
-            ...response,
             error: 'Invalid JSON payload passed.',
         };
     }
@@ -29,10 +26,11 @@ exports.parentValidate = (prop) => {
     const testBody = validKeys.filter((e) => keys.indexOf(e) == -1);
 
     if (testBody.length !== 0) {
+
         return {
-            ...response,
             error: `${testBody[0]} is  required.`,
         };
+
     }
 
     return true;
@@ -49,7 +47,6 @@ exports.parentValidate = (prop) => {
 exports.payloadValidate = (prop) => {
     const newObj = { ...prop };
 
-    const response = { value: ' ', error: ' ' };
 
     const validTypes = _.map([
         _.isArray(newObj.data),
@@ -59,14 +56,12 @@ exports.payloadValidate = (prop) => {
 
     if (!validTypes.includes(true)) {
         return {
-            ...response,
             error: 'The data field should be a valid JSON object.',
         };
     }
 
     return (
         _.isObject(newObj.rule) || {
-            ...response,
             error: 'The rule field should be a valid JSON object.',
         }
     );
@@ -139,8 +134,6 @@ exports.ruleFieldsValidate = (prop) => {
 exports.fieldCheck = (prop) => {
     const newObj = { ...prop };
 
-    const dataField = _.get(newObj, 'data');
-
     const ruleField = _.get(newObj, 'rule.field');
 
     const conditionField = _.get(newObj, 'rule.condition');
@@ -149,7 +142,7 @@ exports.fieldCheck = (prop) => {
 
     const fields = _.split(ruleField, '.');
 
-    let data = _.get(newObj, `data.${ruleField}`);
+    const data = _.get(newObj, `data.${ruleField}`);
 
     if (fields.length > 3) {
         return { error: `The nesting should not be more than two levels.` };
@@ -157,65 +150,10 @@ exports.fieldCheck = (prop) => {
 
     //VALIDATING IF RULE>FIELD ENDS WITH A DOT.
 
-    if (ruleField.endsWith('.')) {
-        return { value: false, data: "empty field" };
+    if (_.isUndefined(data)) {
+        return{ error: `field ${ruleField} is missing from data.`, data }
     }
 
-    if (_.isObject(data) || fields.length == 1) {
-
-        return _.isUndefined(_.get(newObj, `data.${ruleField}`))
-            ? {
-                  error: `field ${ruleField} is is missing from data.`,
-                  data,
-              }
-
-            : {
-                  data,
-                  value:
-                  eval(
-
-                  `dataField[ruleField] ${conditions[conditionField]} conditionValue`
-
-                  ) || false,
-              };
-    }
-
-    let i = 0;
-
-    let query = `data.${fields[i]}.${[fields[i + 1]]}`;
-
-    data = _.get(newObj, query, undefined);
-
-    if (!_.isObject(data) || fields.length == 2) {
-
-        return _.isUndefined(data)
-
-            ? { error: `field ${fields[i]}.${fields[i + 1]} is missing from data.`, data }
-
-            : {
-                data,
-                value:
-                eval(
-
-                `dataField.${ruleField} ${conditions[conditionField]} ${conditionValue}`
-
-                ) || false,
-
-              };
-    }
-
-    query = query.concat(`.${fields[i + 2]}`);
-
-    data = data = _.get(newObj, query, undefined);
-
-    if (data == undefined) {
-
-        return {
-            data,
-            error: `field ${fields[i + 1]}.${fields[i + 2]} is missing from data.`,
-        };
-
-    }
 
     const value =
         eval(`data ${conditions[conditionField]} conditionValue`) || false;
