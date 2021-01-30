@@ -31,7 +31,7 @@ exports.validateRule = (req, res, next) => {
 
   if (error) return next(new ErrorDispatcher(error));
 
-  const message = !value ? 'failed validation.' : 'successfully validated.';
+  const message = !value ? 'failed validation' : 'successfully validated';
 
   const status = value ? MSG.SUCCESS : MSG.ERROR;
 
@@ -42,7 +42,7 @@ exports.validateRule = (req, res, next) => {
   } = req.body;
 
   return res.status(status_code).json({
-    message: `field ${field} ${message}`,
+    message: `field ${field} ${message}.`,
     status,
     data: {
       error: !value,

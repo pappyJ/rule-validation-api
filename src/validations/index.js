@@ -162,6 +162,7 @@ exports.fieldCheck = (prop) => {
     }
 
     if (_.isObject(data) || fields.length == 1) {
+      
         return _.isUndefined(_.get(newObj, `data.${ruleField}`))
             ? {
                   error: `field ${ruleField} is is missing from data.`,
@@ -171,9 +172,11 @@ exports.fieldCheck = (prop) => {
             : {
                   data,
                   value:
-                      eval(
-                          `dataField[ruleField] ${conditions[conditionField]} conditionValue`
-                      ) || false,
+                  eval(
+
+                  `dataField[ruleField] ${conditions[conditionField]} conditionValue`
+
+                  ) || false,
               };
     }
 
@@ -190,12 +193,13 @@ exports.fieldCheck = (prop) => {
             ? { error: `field ${fields[i]}.${fields[i + 1]} is missing from data.`, data }
 
             : {
-                  data,
+                data,
+                value:
+                eval(
 
-                  value:
-                      eval(
-                          `dataField.${ruleField} ${conditions[conditionField]} ${conditionValue}`
-                      ) || false,
+                `dataField.${ruleField} ${conditions[conditionField]} ${conditionValue}`
+
+                ) || false,
 
               };
     }
