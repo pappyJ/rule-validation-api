@@ -9,33 +9,33 @@ const _ = require('lodash');
  */
 
 exports.parentValidate = (prop) => {
-  const newObj = { ...prop };
+    const newObj = { ...prop };
 
-  const response = { value: ' ', error: ' ' };
+    const response = { value: ' ', error: ' ' };
 
-  if (!_.isObject(newObj)) {
-    return {
-      ...response,
-      error: 'Invalid JSON payload passed.',
-    };
-  }
+    if (!_.isObject(newObj)) {
+        return {
+            ...response,
+            error: 'Invalid JSON payload passed.',
+        };
+    }
 
-  //VALIDATING IF FOR AVAILABILITY OF RULEAND DATE OBJECTS
+    //VALIDATING IF FOR AVAILABILITY OF RULEAND DATE OBJECTS
 
-  const validKeys = ['rule', 'data'];
+    const validKeys = ['rule', 'data'];
 
-  const keys = _.keys(newObj);
+    const keys = _.keys(newObj);
 
-  const testBody = validKeys.filter((e) => keys.indexOf(e) == -1);
+    const testBody = validKeys.filter((e) => keys.indexOf(e) == -1);
 
-  if (testBody.length !== 0) {
-    return {
-      ...response,
-      error: `${testBody[0]} is  required.`,
-    };
-  }
+    if (testBody.length !== 0) {
+        return {
+            ...response,
+            error: `${testBody[0]} is  required.`,
+        };
+    }
 
-  return true;
+    return true;
 };
 
 /**
@@ -47,49 +47,42 @@ exports.parentValidate = (prop) => {
 //VALIDATING THE RULE AND DATA DATATYPES
 
 exports.payloadValidate = (prop) => {
-  const newObj = { ...prop };
+    const newObj = { ...prop };
 
-  const response = { value: ' ', error: ' ' };
+    const response = { value: ' ', error: ' ' };
 
-  if (!_.isString(newObj.rule.field)) {
-    return {
-      ...response,
-      error: 'invalid type, rule.fie must be string.',
-    };
-  }
+    const validTypes = _.map([
+        _.isArray(newObj.data),
+        _.isObject(newObj.data),
+        _.isString(newObj.data),
+    ]);
 
-  const validTypes = _.map([
-    _.isArray(newObj.data),
-    _.isObject(newObj.data),
-    _.isString(newObj.data),
-  ]);
-
-  if (!validTypes.includes(true)) {
-    return {
-      ...response,
-      error: 'The data field should be a valid JSON object.',
-    };
-  }
-
-  return (
-    _.isObject(newObj.rule) || {
-      ...response,
-      error: 'The rule field should be a valid JSON object.',
+    if (!validTypes.includes(true)) {
+        return {
+            ...response,
+            error: 'The data field should be a valid JSON object.',
+        };
     }
-  );
+
+    return (
+        _.isObject(newObj.rule) || {
+            ...response,
+            error: 'The rule field should be a valid JSON object.',
+        }
+    );
 };
 
 //VALIDATION RULES OBJECT
 const conditions = {
-  eq: '==',
+    eq: '==',
 
-  neq: '!=',
+    neq: '!=',
 
-  gt: '>',
+    gt: '>',
 
-  gte: '>=',
+    gte: '>=',
 
-  contains: '==',
+    contains: '==',
 };
 
 /**
@@ -101,29 +94,38 @@ const conditions = {
 //VALIDATING THE RULES OBJECT FOR AVAILABILITY OF ALL FIELDS
 
 exports.ruleFieldsValidate = (prop) => {
-  const newObj = { ...prop.rule };
+    const newObj = { ...prop.rule };
 
-  const validKeys = _.keys(conditions);
+    const validKeys = _.keys(conditions);
 
-  if (!validKeys.includes(newObj.condition)) {
-    return {
-      error: `invalid rule, rule conditions must be either ${validKeys.join(
-        '|'
-      )}.`,
-    };
+    if (!validKeys.includes(newObj.condition)) {
+        return {
+            error: `invalid rule, rule conditions must be either ${validKeys.join(
+                '|'
+            )}.`,
+        };
+    }
+
+    if (!_.isString(newObj.field) && !_.isUndefined(newObj.field)) {
+      return {
+          
+          error: 'invalid type, rule.field must be string.',
+      };
   }
 
-  const ruleFields = ['field', 'condition', 'condition_value'];
+    const ruleFields = ['field', 'condition', 'condition_value'];
 
-  const keys = _.keys(newObj);
+    const keys = _.keys(newObj);
 
-  const misingFields = ruleFields.filter((e) => keys.indexOf(e) == -1);
+    const misingFields = ruleFields.filter((e) => keys.indexOf(e) == -1);
 
-  return misingFields.length > 0
-    ? {
-        error: `fields ${misingFields.join(' ')} are required in rule data.`,
-      }
-    : true;
+    return misingFields.length > 0
+        ? {
+              error: `fields ${misingFields.join(
+                  ' '
+              )} are required in rule data.`,
+          }
+        : true;
 };
 
 /**
@@ -135,77 +137,99 @@ exports.ruleFieldsValidate = (prop) => {
 //VALIDATING THE CONDITIONS
 
 exports.fieldCheck = (prop) => {
-  const newObj = { ...prop };
+    const newObj = { ...prop };
 
-  const dataField = _.get(newObj, 'data');
+    const dataField = _.get(newObj, 'data');
 
-  const ruleField = _.get(newObj, 'rule.field');
+    const ruleField = _.get(newObj, 'rule.field');
 
-  const conditionField = _.get(newObj, 'rule.condition');
+    const conditionField = _.get(newObj, 'rule.condition');
 
-  const fields = _.split(ruleField, '.');
+    const conditionValue = _.get(newObj, 'rule.condition_value');
 
-  const conditionValue = _.get(newObj, 'rule.condition_value');
+    const fields = _.split(ruleField, '.');
 
-  let data = _.get(newObj, `data.${ruleField}`);
+    let data = _.get(newObj, `data.${ruleField}`);
 
-  if (_.isObject(data) || fields.length == 1) {
-    return _.isUndefined(_.get(newObj, `data.${ruleField}`))
-      ? { error: `field ${ruleField} is is missing from data.`, data }
-      : {
-          data,
-          value:
-            eval(
-              `dataField[ruleField] ${conditions[conditionField]} conditionValue`
-            ) || false,
+    if (fields.length > 3) {
+        return { error: `The nesting should not be more than two levels.` };
+    }
+
+    //VALIDATING IF RULE>FIELD ENDS WITH A DOT.
+
+    if (ruleField.endsWith('.')) {
+        return { value: false, data: "empty field" };
+    }
+
+    if (_.isObject(data) || fields.length == 1) {
+        return _.isUndefined(_.get(newObj, `data.${ruleField}`))
+            ? {
+                  error: `field ${ruleField} is is missing from data.`,
+                  data,
+              }
+
+            : {
+                  data,
+                  value:
+                      eval(
+                          `dataField[ruleField] ${conditions[conditionField]} conditionValue`
+                      ) || false,
+              };
+    }
+
+    let i = 0;
+
+    let query = `data.${fields[i]}.${[fields[i + 1]]}`;
+
+    data = _.get(newObj, query, undefined);
+
+    if (!_.isObject(data) || fields.length == 2) {
+
+        return _.isUndefined(data)
+
+            ? { error: `field ${fields[i]}.${fields[i + 1]} is missing from data.`, data }
+
+            : {
+                  data,
+
+                  value:
+                      eval(
+                          `dataField.${ruleField} ${conditions[conditionField]} ${conditionValue}`
+                      ) || false,
+
+              };
+    }
+
+    query = query.concat(`.${fields[i + 2]}`);
+
+    data = data = _.get(newObj, query, undefined);
+
+    if (data == undefined) {
+
+        return {
+            data,
+            error: `field ${fields[i + 1]}.${fields[i + 2]} is missing from data.`,
         };
-  }
 
-  let i = 0;
+    }
 
-  let query = `data.${fields[i]}.${[fields[i + 1]]}`;
+    const value =
+        eval(`data ${conditions[conditionField]} conditionValue`) || false;
 
-  data = _.get(newObj, query, undefined);
-  if (!_.isObject(data) || fields.length == 2) {
-    return _.isUndefined(data)
-      ? { error: `field ${fields[i + 1]} is missing from data.`, data }
-      : {
-          data,
-          value:
-            eval(
-              `dataField.${ruleField} ${conditions[conditionField]} ${conditionValue}`
-            ) || false,
-        };
-  }
-
-  query = query.concat(`.${fields[i + 2]}`);
-
-  data = data = _.get(newObj, query, undefined);
-
-  if (data == undefined) {
-    return {
-      data,
-      error: `field ${fields[i + 2]} is missing from data.`,
-    };
-  }
-
-  const value =
-    eval(`data ${conditions[conditionField]} conditionValue`) || false;
-
-  return { value, data };
+    return { value, data };
 };
 
 //COMPOSE ALL VALIDATION FUNCTIONS
 exports.validationEngine = (fns, data) => {
-  let value;
+    let value;
 
-  for (fn of fns) {
-    value = fn(data);
+    for (fn of fns) {
+        value = fn(data);
 
-    if (value !== true) {
-      return value;
+        if (value !== true) {
+            return value;
+        }
     }
-  }
 
-  return value;
+    return value;
 };
